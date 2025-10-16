@@ -1,4 +1,4 @@
-import { prepareInstructions } from 'constants';
+import { prepareInstructions } from '../../constants';
 import React, { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router';
 import FileUploader from '~/components/FileUploader';
@@ -57,32 +57,33 @@ const upload = () => {
 
         const uuid = generateUUID();
         const data = {
-            id : uuid,
-            resumePath : uploadedFile.path,
-            imagePath : uploadedImage.path,
-            companyName,jobTitle,jobDescription,
-            feedback :'' ,
+            id: uuid,
+            resumePath: uploadedFile.path,
+            imagePath: uploadedImage.path,
+            companyName, jobTitle, jobDescription,
+            feedback: '',
 
         }
 
-        await kv.set(`resume:${uuid}`,JSON.stringify(data));
+        await kv.set(`resume:${uuid}`, JSON.stringify(data));
         setStatusText('Analyzing ...');
 
         const feedback = await ai.feedback(
             uploadedFile.path,
-            prepareInstructions({jobTitle , jobDescription})
+            prepareInstructions({ jobTitle, jobDescription })
         )
 
-        if(!feedback) return setStatusText('Error : Failed to analyze resuem');
+        if (!feedback) return setStatusText('Error : Failed to analyze resuem');
 
         const feedbackText = typeof feedback.message.content === 'string'
-        ? feedback.message.content
-        : feedback.message.content[0].text;
+            ? feedback.message.content
+            : feedback.message.content[0].text;
 
         data.feedback = JSON.parse(feedbackText);
-        await kv.set(`resume:${uuid}`,JSON.stringify(data));
+        await kv.set(`resume:${uuid}`, JSON.stringify(data));
         setStatusText('Analysis complete , redirecting...');
         console.log(data);
+        navigate(`/resume/${uuid}`);
 
 
 
